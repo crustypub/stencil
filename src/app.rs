@@ -1,11 +1,11 @@
-use crate::utils::{ModeError, ModeKind, get_app_mode};
+use crate::utils::{ModeError, ModeKind, PathTypeOutput, get_app_mode, get_template_path};
 use std::env;
 
 pub struct App {
-    args: Vec<String>,
-    mode: ModeKind,
-    template_path: Option<String>,
-    template_keys: Option<Vec<(String, String)>>,
+    pub args: Vec<String>,
+    pub mode: ModeKind,
+    pub template_path: Option<String>,
+    pub template_keys: Option<Vec<(String, String)>>,
 }
 
 impl App {
@@ -30,5 +30,19 @@ impl App {
             template_keys: None,
             template_path: None,
         };
+    }
+    pub fn run(&mut self) {
+        self.template_path = Some(String::new());
+        match self.mode {
+            ModeKind::TemplateAdd => match get_template_path(&self.args) {
+                PathTypeOutput::TomlFile(path) => {
+                    println!("path is: {}", path)
+                }
+                PathTypeOutput::Error(err) => {
+                    eprintln!("{}", err);
+                }
+            },
+            ModeKind::Generate => {}
+        }
     }
 }

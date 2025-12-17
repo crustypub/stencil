@@ -3,5 +3,6 @@ mod models;
 mod utils;
 
 fn main() {
-    let app = app::App::new();
+    let mut app = app::App::new();
+    app.run();
 }
