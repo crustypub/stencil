@@ -1,4 +1,5 @@
 mod app;
+mod configmanager;
 mod models;
 mod utils;
 

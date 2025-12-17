@@ -1,6 +1,7 @@
+use directories::ProjectDirs;
 use std::fs;
-use std::io::Error;
-use std::path::Path;
+use std::io::{self, Read, Write};
+use std::path::{Path, PathBuf};
 
 pub enum ModeKind {
     TemplateAdd,
@@ -54,4 +55,27 @@ pub fn get_template_path(args: &Vec<String>) -> PathTypeOutput {
         }
     }
     return PathTypeOutput::Error("Error: you have to write path to config .toml file".to_string());
+}
+
+pub fn save_config_file(original_path: &Path) -> io::Result<PathBuf> {
+    if let Some(proj_dirs) = ProjectDirs::from("com", "mycompany", "myapp") {
+        let config_dir = proj_dirs.config_dir();
+
+        fs::create_dir_all(config_dir)?;
+
+        let file_name = original_path
+            .file_name()
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "Invalid file path"))?;
+
+        let target_path = config_dir.join(file_name);
+
+        fs::copy(original_path, &target_path)?;
+
+        Ok(target_path)
+    } else {
+        Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "Could not determine config directory",
+        ))
+    }
 }
