@@ -1,5 +1,8 @@
 use crate::configmanager::ConfigManager;
-use crate::utils::{ModeError, ModeKind, PathTypeOutput, get_app_mode, get_template_path};
+use crate::utils::{
+    self, ConfigPathOutput, ModeError, ModeKind, PathTypeOutput, get_app_mode, get_config_path,
+    get_template_path,
+};
 use std::env;
 use std::path::Path;
 
@@ -41,14 +44,21 @@ impl App {
         match self.mode {
             ModeKind::TemplateAdd => match get_template_path(&self.args) {
                 PathTypeOutput::TomlFile(path) => {
-                    let saved_path = self.config_manager.save_config_file(Path::new(&path));
-                    println!("path is: {:?}", saved_path);
+                    self.config_manager
+                        .save_config_file(Path::new(&path))
+                        .unwrap();
+                    println!("Config saved successfully.");
                 }
                 PathTypeOutput::Error(err) => {
                     eprintln!("{}", err);
                 }
             },
-            ModeKind::Generate => {}
+            ModeKind::Generate => match get_config_path(&self.args, &self.config_manager) {
+                ConfigPathOutput::Path(path) => {}
+                ConfigPathOutput::Error(error) => {
+                    eprintln!("{}", error);
+                }
+            },
         }
     }
 }

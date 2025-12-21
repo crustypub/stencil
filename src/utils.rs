@@ -1,5 +1,6 @@
+use crate::configmanager::ConfigManager;
 use directories::ProjectDirs;
-use std::fs;
+use std::fs::{self, metadata};
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 
@@ -16,6 +17,11 @@ pub enum ModeError {
 
 pub enum PathTypeOutput {
     TomlFile(String),
+    Error(String),
+}
+
+pub enum ConfigPathOutput {
+    Path(String),
     Error(String),
 }
 
@@ -57,25 +63,30 @@ pub fn get_template_path(args: &Vec<String>) -> PathTypeOutput {
     return PathTypeOutput::Error("Error: you have to write path to config .toml file".to_string());
 }
 
-pub fn save_config_file(original_path: &Path) -> io::Result<PathBuf> {
-    if let Some(proj_dirs) = ProjectDirs::from("com", "mycompany", "myapp") {
-        let config_dir = proj_dirs.config_dir();
+pub fn get_config_path(args: &Vec<String>, config_manager: &ConfigManager) -> ConfigPathOutput {
+    if args.len() > 2 {
+        let config_name = args[2].clone() + ".toml";
 
-        fs::create_dir_all(config_dir)?;
-
-        let file_name = original_path
-            .file_name()
-            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "Invalid file path"))?;
-
-        let target_path = config_dir.join(file_name);
-
-        fs::copy(original_path, &target_path)?;
-
-        Ok(target_path)
-    } else {
-        Err(io::Error::new(
-            io::ErrorKind::NotFound,
-            "Could not determine config directory",
-        ))
+        if let Some(path) = config_manager.get_config_file(&config_name) {
+            match fs::metadata(path) {
+                Ok(metadata) => {
+                    if metadata.is_file() {}
+                    return ConfigPathOutput::Path(path.display().to_string());
+                }
+                Err(e) => {
+                    return ConfigPathOutput::Error(e.to_string());
+                }
+            }
+        } else {
+            return ConfigPathOutput::Error(
+                "Error: config with this name didn't exist, add it with -a flag".to_string(),
+            );
+        }
     }
+    return ConfigPathOutput::Error(
+        "Error: you have to write config name for file generate".to_string(),
+    );
+}
+pub fn generate_file(config_name: String, generate_path: &String) {
+    let generate_path = Path::new(generate_path);
 }
