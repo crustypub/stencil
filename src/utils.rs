@@ -87,6 +87,9 @@ pub fn get_config_path(args: &Vec<String>, config_manager: &ConfigManager) -> Co
         "Error: you have to write config name for file generate".to_string(),
     );
 }
-pub fn generate_file(config_name: String, generate_path: &String) {
-    let generate_path = Path::new(generate_path);
+pub fn generate_file(keys: &Vec<String>, content: String, path: Option<String>) {
+    match path {
+        Some(p) => {}
+        None => {}
+    }
 }

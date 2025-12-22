@@ -4,6 +4,7 @@ use crate::utils::{
     get_template_path,
 };
 use std::env;
+use std::fs;
 use std::path::Path;
 
 pub struct App {
@@ -54,7 +55,11 @@ impl App {
                 }
             },
             ModeKind::Generate => match get_config_path(&self.args, &self.config_manager) {
-                ConfigPathOutput::Path(path) => {}
+                ConfigPathOutput::Path(path) => {
+                    let content = fs::read_to_string(path).unwrap();
+                    let config = toml::from_str(&content).unwrap();
+                    println!("content: {:?}", content);
+                }
                 ConfigPathOutput::Error(error) => {
                     eprintln!("{}", error);
                 }
