@@ -1,7 +1,7 @@
 use crate::configmanager::ConfigManager;
 use crate::utils::{
-    self, ConfigPathOutput, ModeError, ModeKind, PathTypeOutput, get_app_mode, get_config_path,
-    get_template_path,
+    self, ConfigPathOutput, ModeError, ModeKind, PathTypeOutput, generate_file, get_app_mode,
+    get_config_path, get_template_path, parse_key_value_pairs,
 };
 use std::env;
 use std::fs;
@@ -11,7 +11,6 @@ pub struct App {
     pub args: Vec<String>,
     pub mode: ModeKind,
     pub template_path: Option<String>,
-    pub template_keys: Option<Vec<(String, String)>>,
     pub config_manager: ConfigManager,
 }
 
@@ -35,7 +34,6 @@ impl App {
         return Self {
             mode,
             args,
-            template_keys: None,
             template_path: None,
             config_manager,
         };
@@ -57,8 +55,8 @@ impl App {
             ModeKind::Generate => match get_config_path(&self.args, &self.config_manager) {
                 ConfigPathOutput::Path(path) => {
                     let content = fs::read_to_string(path).unwrap();
-                    let config = toml::from_str(&content).unwrap();
-                    println!("content: {:?}", content);
+                    let pair_keys = parse_key_value_pairs(&self.args);
+                    generate_file(&pair_keys, content, &self.args);
                 }
                 ConfigPathOutput::Error(error) => {
                     eprintln!("{}", error);

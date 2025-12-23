@@ -1,8 +1,18 @@
-title = "TOML Example"
-[owner]
-name = "Tom Preston-Werner"
-dob = "1979-05-27T07:32:00-08:00"
-[database]
-enabled = true
-ports = [8000, 8001, 8002]
-data = [["delta", "phi"], [3.14]]
+keys = ["componentName", "title"]
+
+stencil =
+"
+import React, { useState, useEffect } from 'react';
+
+function [[compooentName]]() {
+  const [value, setValue] = useState(null);
+
+  return (
+    <div className="counter">
+      <span className="title">[[title]]</span>
+    </div>
+  );
+}
+
+export default [[componentName]];  
+"

@@ -1,5 +1,6 @@
 use crate::configmanager::ConfigManager;
 use directories::ProjectDirs;
+use std::env;
 use std::fs::{self, metadata};
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -87,9 +88,28 @@ pub fn get_config_path(args: &Vec<String>, config_manager: &ConfigManager) -> Co
         "Error: you have to write config name for file generate".to_string(),
     );
 }
-pub fn generate_file(keys: &Vec<String>, content: String, path: Option<String>) {
-    match path {
-        Some(p) => {}
-        None => {}
+pub fn generate_file(keys: &Vec<(String, String)>, content: String, args: &Vec<String>) {
+    let current_dir = env::current_dir().unwrap().to_string_lossy().into_owned();
+    let path = if args.len() - 3 == keys.len() {
+        current_dir
+    } else {
+        args.last().cloned().unwrap_or_else(|| current_dir)
+    };
+    println!("{}", keys.len());
+    println!("{}", args.len());
+    println!("{:?}", path);
+}
+
+pub fn parse_key_value_pairs(strings: &Vec<String>) -> Vec<(String, String)> {
+    let mut result = Vec::new();
+
+    for s in strings {
+        let parts: Vec<&str> = s.splitn(2, '=').collect();
+
+        if parts.len() == 2 && !parts[0].is_empty() {
+            result.push((parts[0].to_string(), parts[1].to_string()));
+        }
     }
+
+    return result;
 }
