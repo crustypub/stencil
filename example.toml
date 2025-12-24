@@ -6,7 +6,7 @@ stencil =
 "
 import React, { useState, useEffect } from 'react';
 
-function [[compooentName]]() {
+function [[componentName]]() {
   const [value, setValue] = useState(null);
 
   return (

@@ -107,11 +107,11 @@ pub fn generate_file(
     };
 
     path = path + "/" + &get_random_string(4).as_str();
+    let content = get_content_from_template_ref(keys, &content);
 
-    match File::create(path) {
+    match fs::write(&path, content) {
         Ok(_) => {
-            println!("Файл создан");
-            return GenerateFileOutput::Ok("hello".to_string());
+            return GenerateFileOutput::Ok(path);
         }
         Err(_e) => {
             return GenerateFileOutput::Error("Error: create file be failed".to_string());
@@ -140,4 +140,23 @@ fn get_random_string(length: usize) -> String {
         .map(char::from)
         .collect();
     return filename;
+}
+
+pub fn check_stencil_is_valid(content: &String) -> bool {
+    if content.contains("file_type") && content.contains("keys") && content.contains("stencil") {
+        return true;
+    }
+
+    return false;
+}
+
+fn get_content_from_template_ref(pairs: &Vec<(String, String)>, content: &String) -> String {
+    let mut result = content.clone();
+
+    for (key, value) in pairs {
+        let modify_key = format!("[[{}]]", key);
+        result = result.replace(&modify_key, value);
+    }
+
+    return result;
 }

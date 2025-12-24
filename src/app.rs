@@ -1,7 +1,7 @@
 use crate::configmanager::ConfigManager;
 use crate::utils::{
-    self, ConfigPathOutput, ModeError, ModeKind, PathTypeOutput, generate_file, get_app_mode,
-    get_config_path, get_template_path, parse_key_value_pairs,
+    self, ConfigPathOutput, ModeError, ModeKind, PathTypeOutput, check_stencil_is_valid,
+    generate_file, get_app_mode, get_config_path, get_template_path, parse_key_value_pairs,
 };
 use std::env;
 use std::fs;
@@ -56,7 +56,11 @@ impl App {
                 ConfigPathOutput::Path(path) => {
                     let content = fs::read_to_string(path).unwrap();
                     let pair_keys = parse_key_value_pairs(&self.args);
-                    generate_file(&pair_keys, content, &self.args);
+                    if check_stencil_is_valid(&content) {
+                        generate_file(&pair_keys, content, &self.args);
+                    } else {
+                        eprint!("Error: Your stencil is invalid, please check the documentation.");
+                    }
                 }
                 ConfigPathOutput::Error(error) => {
                     eprintln!("{}", error);
