@@ -1,9 +1,9 @@
 use crate::configmanager::ConfigManager;
-use directories::ProjectDirs;
+use rand::{Rng, distr::Alphanumeric};
 use std::env;
-use std::fs::{self, metadata};
-use std::io::{self, Read, Write};
-use std::path::{Path, PathBuf};
+use std::fs;
+use std::fs::File;
+use std::path::Path;
 
 pub enum ModeKind {
     TemplateAdd,
@@ -23,6 +23,11 @@ pub enum PathTypeOutput {
 
 pub enum ConfigPathOutput {
     Path(String),
+    Error(String),
+}
+
+pub enum GenerateFileOutput {
+    Ok(String),
     Error(String),
 }
 
@@ -88,16 +93,30 @@ pub fn get_config_path(args: &Vec<String>, config_manager: &ConfigManager) -> Co
         "Error: you have to write config name for file generate".to_string(),
     );
 }
-pub fn generate_file(keys: &Vec<(String, String)>, content: String, args: &Vec<String>) {
+pub fn generate_file(
+    keys: &Vec<(String, String)>,
+    content: String,
+    args: &Vec<String>,
+) -> GenerateFileOutput {
     let current_dir = env::current_dir().unwrap().to_string_lossy().into_owned();
-    let path = if args.len() - 3 == keys.len() {
+    let mut path = if args.len() - 3 == keys.len() {
         current_dir
     } else {
-        args.last().cloned().unwrap_or_else(|| current_dir)
+        let output = args.last().cloned().unwrap_or_else(|| current_dir);
+        output
     };
-    println!("{}", keys.len());
-    println!("{}", args.len());
-    println!("{:?}", path);
+
+    path = path + "/" + &get_random_string(4).as_str();
+
+    match File::create(path) {
+        Ok(_) => {
+            println!("Файл создан");
+            return GenerateFileOutput::Ok("hello".to_string());
+        }
+        Err(_e) => {
+            return GenerateFileOutput::Error("Error: create file be failed".to_string());
+        }
+    }
 }
 
 pub fn parse_key_value_pairs(strings: &Vec<String>) -> Vec<(String, String)> {
@@ -112,4 +131,13 @@ pub fn parse_key_value_pairs(strings: &Vec<String>) -> Vec<(String, String)> {
     }
 
     return result;
+}
+
+fn get_random_string(length: usize) -> String {
+    let filename: String = rand::rng()
+        .sample_iter(&Alphanumeric)
+        .take(length)
+        .map(char::from)
+        .collect();
+    return filename;
 }
