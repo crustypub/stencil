@@ -1,5 +1,6 @@
 use crate::configmanager::ConfigManager;
 use rand::{Rng, distr::Alphanumeric};
+use serde::Deserialize;
 use std::env;
 use std::fs;
 use std::fs::File;
@@ -26,8 +27,15 @@ pub enum ConfigPathOutput {
     Error(String),
 }
 
+#[derive(Debug, Deserialize)]
+struct ConfigToml {
+    file_type: String,
+    keys: Vec<String>,
+    stencil: String,
+}
+
 pub enum GenerateFileOutput {
-    Ok(String),
+    GenerateFilePath(String),
     Error(String),
 }
 
@@ -106,12 +114,14 @@ pub fn generate_file(
         output
     };
 
-    path = path + "/" + &get_random_string(4).as_str();
-    let content = get_content_from_template_ref(keys, &content);
+    let config: ConfigToml = toml::from_str(&content).unwrap();
+    let content = get_content_from_template_ref(keys, &config.stencil);
+    let file_type = &config.file_type;
+    path = path + "/" + &get_random_string(4).as_str() + file_type;
 
     match fs::write(&path, content) {
         Ok(_) => {
-            return GenerateFileOutput::Ok(path);
+            return GenerateFileOutput::GenerateFilePath(path);
         }
         Err(_e) => {
             return GenerateFileOutput::Error("Error: create file be failed".to_string());

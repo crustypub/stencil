@@ -2,19 +2,18 @@ file_type = ".jsx"
 
 keys = ["componentName", "title"]
 
-stencil =
-"
+stencil = """
 import React, { useState, useEffect } from 'react';
 
 function [[componentName]]() {
   const [value, setValue] = useState(null);
 
   return (
-    <div className="counter">
-      <span className="title">[[title]]</span>
+    <div className=\"counter\">
+      <span className=\"title\">[[title]]</span>
     </div>
   );
 }
 
-export default [[componentName]];  
-"
+export default [[componentName]];
+"""
